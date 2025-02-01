@@ -102,12 +102,13 @@ async def message_is_confirm(message:types.Message,state:FSMContext):
 @dp.message_handler(lambda x : x.text.isdigit())
 async def wait_for_post_id(message: types.Message, state: FSMContext):
     try:
-        kino_kod = int(message.text)  # Expecting a valid post_id (integer)
+        if message.text.isdigit():
+            kino_kod = message.text  # Expecting a valid post_id (integer)
     except ValueError:
         await message.reply(
             "Siz kino kodi yubormadingiz.\nKino kodi raqamdan iborat.\nQayta qidirishga kirish uchun /start ni bosing")
-        await state.finish()
         return
+
 
     kino = kino_db.get_kino_by_post_id(kino_kod)
 
@@ -116,7 +117,9 @@ async def wait_for_post_id(message: types.Message, state: FSMContext):
         caption = kino['caption']
         await message.answer_video(file_id, caption=caption, protect_content=True)
     else:
-        await message.answer("Kino topilmadi.")
+        await message.answer("Kino topilmadi.\n Qayta /start ni bosing")
+    await state.finish()
+
 
 
 @dp.message_handler(commands='admin')

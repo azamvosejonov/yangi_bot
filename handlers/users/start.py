@@ -4,6 +4,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from loader import dp, user_db, bot
 import logging
 from data.config import ADMINS
+import asyncio
+
 
 
 CHANNEL_USERNAME = "@kino_bot_rasmiy_kanal"
@@ -29,13 +31,11 @@ async def bot_start(message: types.Message):
     if is_channel_subscribed or is_bot_subscribed:
         telegram_id = message.from_user.id
         username = message.from_user.username
-        first_name = message.from_user.first_name
-        last_name = message.from_user.last_name if message.from_user.last_name else "No last name"
 
         # Add user to the database if not already added
         if not user_db.select_user(telegram_id=telegram_id):
             user_db.add_user(telegram_id=telegram_id, username=username)
-            logging.info(f"New user added: telegram_id:{telegram_id}, username: {username}, full_name: {first_name} {last_name}")
+            logging.info(f"New user added: telegram_id:{telegram_id}, username: {username}")
 
             count = user_db.count_users()
 
@@ -49,9 +49,9 @@ async def bot_start(message: types.Message):
                     f"Foydalanuvchi bazaga qo'shildi\n\n"
                     f"Bazada <b>{count}</b>  ta foydalanuvchi bor"
                 )
-            await message.answer(f"Salom, {first_name} {last_name}! Siz yangi foydalanuvchisiz!")
+            await message.answer(f"Salom, {message.from_user.full_name}  {username} ! Siz yangi foydalanuvchisiz!")
         else:
-            await message.answer(f"Salom, {first_name} {last_name}! Siz allaqachon foydalanuvchisiz!")
+            await message.answer(f"Salom, {message.from_user.full_name}  {username}! Siz allaqachon foydalanuvchisiz!")
     else:
         # If the user isn't subscribed to the required channels or bot
         keyboard = InlineKeyboardMarkup().add(
@@ -59,3 +59,5 @@ async def bot_start(message: types.Message):
             InlineKeyboardButton("🔔 Botga obuna bo‘lish", url=f"https://t.me/{BOT_USERNAME[1:]}")
         )
         await message.answer("⚠️ Botdan foydalanish uchun avval kanalimizga va botimizga obuna bo‘lishingiz kerak!", reply_markup=keyboard)
+
+
